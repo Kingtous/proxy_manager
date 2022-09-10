@@ -18,10 +18,10 @@ class ProxyManager {
     return ProxyManagerPlatform.instance.getPlatformVersion();
   }
 
-  void setAsSystemProxy(ProxyTypes types, String url, int port) {
+  Future<void> setAsSystemProxy(ProxyTypes types, String url, int port) async {
     switch (Platform.operatingSystem) {
       case "windows":
-        setAsSystemProxyWindows(types, url, port);
+        await setAsSystemProxyWindows(types, url, port);
         break;
       case "linux":
         setAsSystemProxyLinux(types, url, port);
@@ -88,19 +88,19 @@ class ProxyManager {
     }
   }
 
-  void cleanSystemProxy() {
+  Future<void> cleanSystemProxy() async {
     switch (Platform.operatingSystem) {
       case "linux":
         cleanSystemProxyLinux();
         break;
       case "windows":
-        cleanSystemProxyWindows();
+        await cleanSystemProxyWindows();
         break;
     }
   }
 
-  void cleanSystemProxyWindows() {
-    ProxyManagerPlatform.instance.cleanSystemProxy();
+  Future<void> cleanSystemProxyWindows() async {
+    await ProxyManagerPlatform.instance.cleanSystemProxy();
   }
 
   void cleanSystemProxyLinux() {

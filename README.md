@@ -1,5 +1,8 @@
 # ProxyManager for Flutter
 
+[pub-image]: https://img.shields.io/pub/v/proxy_manager.svg
+[pub-url]: https://pub.dev/packages/proxy_manager
+
 ## Features
 
 -  set/clean system proxy settings for all desktop platforms

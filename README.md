@@ -1,7 +1,6 @@
 # ProxyManager for Flutter
 
-[pub-image]: https://img.shields.io/pub/v/proxy_manager.svg
-[pub-url]: https://pub.dev/packages/proxy_manager
+![pub-image](https://img.shields.io/pub/v/proxy_manager.svg)
 
 ## Features
 

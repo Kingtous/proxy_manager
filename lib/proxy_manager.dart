@@ -13,25 +13,27 @@ import 'package:path/path.dart' as path;
 enum ProxyTypes { http, https, socks }
 
 class ProxyManager {
+  /// get platform version
   Future<String?> getPlatformVersion() {
     return ProxyManagerPlatform.instance.getPlatformVersion();
   }
 
+  /// set system proxy
   Future<void> setAsSystemProxy(ProxyTypes types, String url, int port) async {
     switch (Platform.operatingSystem) {
       case "windows":
-        await setAsSystemProxyWindows(types, url, port);
+        await _setAsSystemProxyWindows(types, url, port);
         break;
       case "linux":
-        setAsSystemProxyLinux(types, url, port);
+        _setAsSystemProxyLinux(types, url, port);
         break;
       case "macos":
-        await setAsSystemProxyMacos(types, url, port);
+        await _setAsSystemProxyMacos(types, url, port);
         break;
     }
   }
 
-  Future<List<String>> getNetworkDeviceListMacos() async {
+  Future<List<String>> _getNetworkDeviceListMacos() async {
     final resp = await Process.run(
         "/usr/sbin/networksetup", ["-listallnetworkservices"]);
     final lines = resp.stdout.toString().split("\n");
@@ -39,9 +41,9 @@ class ProxyManager {
     return lines;
   }
 
-  Future<void> setAsSystemProxyMacos(
+  Future<void> _setAsSystemProxyMacos(
       ProxyTypes type, String url, int port) async {
-    final devices = await getNetworkDeviceListMacos();
+    final devices = await _getNetworkDeviceListMacos();
     for (final dev in devices) {
       switch (type) {
         case ProxyTypes.http:
@@ -66,8 +68,8 @@ class ProxyManager {
     }
   }
 
-  Future<void> cleanSystemProxyMacos() async {
-    final devices = await getNetworkDeviceListMacos();
+  Future<void> _cleanSystemProxyMacos() async {
+    final devices = await _getNetworkDeviceListMacos();
     for (final dev in devices) {
       await Future.wait([
         Process.run(
@@ -82,12 +84,12 @@ class ProxyManager {
     }
   }
 
-  Future<void> setAsSystemProxyWindows(
+  Future<void> _setAsSystemProxyWindows(
       ProxyTypes types, String url, int port) async {
     ProxyManagerPlatform.instance.setSystemProxy(types, url, port);
   }
 
-  void setAsSystemProxyLinux(ProxyTypes types, String url, int port) {
+  void _setAsSystemProxyLinux(ProxyTypes types, String url, int port) {
     final homeDir = Platform.environment['HOME']!;
     final configDir = path.join(homeDir, ".config");
     final cmdList = List<List<String>>.empty(growable: true);
@@ -139,24 +141,25 @@ class ProxyManager {
     }
   }
 
+  /// clean system proxy
   Future<void> cleanSystemProxy() async {
     switch (Platform.operatingSystem) {
       case "linux":
-        cleanSystemProxyLinux();
+        _cleanSystemProxyLinux();
         break;
       case "windows":
-        await cleanSystemProxyWindows();
+        await _cleanSystemProxyWindows();
         break;
       case "macos":
-        await cleanSystemProxyMacos();
+        await _cleanSystemProxyMacos();
     }
   }
 
-  Future<void> cleanSystemProxyWindows() async {
+  Future<void> _cleanSystemProxyWindows() async {
     await ProxyManagerPlatform.instance.cleanSystemProxy();
   }
 
-  void cleanSystemProxyLinux() {
+  void _cleanSystemProxyLinux() {
     final homeDir = Platform.environment['HOME']!;
     final configDir = path.join(homeDir, ".config/");
     final cmdList = List<List<String>>.empty(growable: true);

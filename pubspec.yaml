@@ -1,6 +1,6 @@
 name: proxy_manager
-description: Proxy Setter for flutter
-version: 0.0.1
+description: Proxy Setter for flutter, allow users to set system proxy from dart code directly.
+version: 0.0.1-1
 homepage: https://github.com/Kingtous/proxy_manager
 
 environment:
@@ -41,6 +41,10 @@ flutter:
     # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
     # -------------------
       windows:
+        pluginClass: ProxyManagerPlugin
+      macos:
+        pluginClass: ProxyManagerPlugin
+      linux:
         pluginClass: ProxyManagerPlugin
     # -------------------
 

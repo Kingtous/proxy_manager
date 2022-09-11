@@ -24,14 +24,17 @@ abstract class ProxyManagerPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// get platform version
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
+  /// set system proxy base
   Future<void> setSystemProxy(ProxyTypes types, String url, int port) async {
     throw UnimplementedError('setSystemProxy() has not been implemented.');
   }
 
+  /// unset system proxy base
   Future<void> cleanSystemProxy() async {
     throw UnimplementedError('cleanSystemProxy() has not been implemented.');
   }

@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 enum ProxyTypes { http, https, socks }
 
 class ProxyManager {
-
   Future<String?> getPlatformVersion() {
     return ProxyManagerPlatform.instance.getPlatformVersion();
   }
@@ -27,13 +26,65 @@ class ProxyManager {
         setAsSystemProxyLinux(types, url, port);
         break;
       case "macos":
-        // TODO
+        await setAsSystemProxyMacos(types, url, port);
         break;
     }
   }
 
-  Future<void> setAsSystemProxyWindows(ProxyTypes types, String url, int port) async {
-     ProxyManagerPlatform.instance.setSystemProxy(types, url, port);
+  Future<List<String>> getNetworkDeviceListMacos() async {
+    final resp = await Process.run(
+        "/usr/sbin/networksetup", ["-listallnetworkservices"]);
+    final lines = resp.stdout.toString().split("\n");
+    lines.removeWhere((element) => element.contains("*"));
+    return lines;
+  }
+
+  Future<void> setAsSystemProxyMacos(
+      ProxyTypes type, String url, int port) async {
+    final devices = await getNetworkDeviceListMacos();
+    for (final dev in devices) {
+      switch (type) {
+        case ProxyTypes.http:
+          await Process.run(
+              "/usr/sbin/networksetup", ["-setwebproxystate", dev, "on"]);
+          await Process.run(
+              "/usr/sbin/networksetup", ["-setwebproxy", dev, url, "$port"]);
+          break;
+        case ProxyTypes.https:
+          await Process.run(
+              "/usr/sbin/networksetup", ["-setsecurewebproxystate", dev, "on"]);
+          await Process.run("/usr/sbin/networksetup",
+              ["-setsecurewebproxy", dev, url, "$port"]);
+          break;
+        case ProxyTypes.socks:
+          await Process.run("/usr/sbin/networksetup",
+              ["-setsocksfirewallproxystate", dev, "on"]);
+          await Process.run("/usr/sbin/networksetup",
+              ["-setsocksfirewallproxy", dev, url, "$port"]);
+          break;
+      }
+    }
+  }
+
+  Future<void> cleanSystemProxyMacos() async {
+    final devices = await getNetworkDeviceListMacos();
+    for (final dev in devices) {
+      await Future.wait([
+        Process.run(
+            "/usr/sbin/networksetup", ["-setautoproxystate", dev, "off"]),
+        Process.run(
+            "/usr/sbin/networksetup", ["-setwebproxystate", dev, "off"]),
+        Process.run(
+            "/usr/sbin/networksetup", ["-setsecurewebproxystate", dev, "off"]),
+        Process.run("/usr/sbin/networksetup",
+            ["-setsocksfirewallproxystate", dev, "off"]),
+      ]);
+    }
+  }
+
+  Future<void> setAsSystemProxyWindows(
+      ProxyTypes types, String url, int port) async {
+    ProxyManagerPlatform.instance.setSystemProxy(types, url, port);
   }
 
   void setAsSystemProxyLinux(ProxyTypes types, String url, int port) {
@@ -96,6 +147,8 @@ class ProxyManager {
       case "windows":
         await cleanSystemProxyWindows();
         break;
+      case "macos":
+        await cleanSystemProxyMacos();
     }
   }
 
